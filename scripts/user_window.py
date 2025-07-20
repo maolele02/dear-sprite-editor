@@ -135,6 +135,7 @@ class UserWindow(object):
                 ret_group = self._create_op_group(mode, titles)
                 self._mode_2_group[mode] = ret_group
             self._op_root_group = op_group
+            dpg.add_button(label='slice', callback=self._on_slice)
 
     def _create_op_group(self, mode, titles):
         with dpg.group(horizontal=False) as ret_group:
@@ -280,6 +281,9 @@ class UserWindow(object):
     def _on_switch_mode(self, sender, selected_item):
         self._switch_mode(selected_item)
 
+    def _on_slice(self, sender):
+        pass
+
     def _switch_mode(self, mode):
         self._mode = mode
         for mode in self.MODES:
@@ -337,63 +341,35 @@ class UserWindow(object):
         padding_y = self._padding_y * self._img_scale
         offset_x = self._offset_x * self._img_scale
         offset_y = self._offset_y * self._img_scale
-        w = img_w - 2 * padding_x
-        h = img_h - 2 * padding_y
+        w = img_w - offset_x
+        h = img_h - offset_y
         if self._mode == self.MODE_GRID_BY_CELL_COUNT:
             row = self._row
             col = self._col
-            # cell_h由h = row * cell_h + (row - 1) * offset_y得出
-            cell_h = (h - (row - 1) * offset_y) / row
-            # cell_w由h = col * cell_w + (col - 1) * offset_x得出
-            cell_w = (w - (col - 1) * offset_x) / col
+            # cell_h由h = row * cell_h + (row - 1) * padding_y得出
+            cell_h = (h - (row - 1) * padding_y) / row
+            # cell_w由h = col * cell_w + (col - 1) * padding_x得出
+            cell_w = (w - (col - 1) * padding_x) / col
         elif self._mode == self.MODE_GRID_BY_CELL_SIZE:
             cell_w = self._cell_w * self._img_scale
             cell_h = self._cell_h * self._img_scale
-            row = math.ceil((h + offset_y) / (cell_h + offset_y))
-            col = math.ceil((w + offset_x) / (cell_w + offset_x))
-        enable_offset_y = offset_y > 0 and row > 1
-        enable_offset_x = offset_x > 0 and col > 1
-        if enable_offset_x:
-            col_line_count = col * 2
-        else:
-            col_line_count = col + 1
-        if enable_offset_y:
-            row_line_count = row * 2
-        else:
-            row_line_count = row + 1
+            row = math.ceil((h + padding_y) / (cell_h + padding_y))
+            col = math.ceil((w + padding_x) / (cell_w + padding_x))
         with dpg.draw_layer(parent=self._img_draw_list) as draw_layer:
-            begin_x = padding_x
-            for index in range(row_line_count):  # 横线
-                if enable_offset_y:
-                    cell_no = int(index / 2) + 1  # 当前要绘制的是第几个格子的线段
-                    is_lower_line = index % 2 == 1  # 当前绘制的是否是格子的下部分的线段
-                    offset_count = cell_no - 1
-                    above_sum_cell_height = (cell_no - 1) * cell_h
-                    above_sum_offset = offset_count * offset_y
-                    y = padding_y + above_sum_cell_height + above_sum_offset + int(is_lower_line) * cell_h
-                else:
-                    y = padding_y + index * cell_h
-                dpg.draw_line(
-                    (begin_x, y),
-                    (begin_x + w, y),
-                    color=(255, 0, 0, 255),
-                    thickness=1,
-                )
-            begin_y = padding_y
-            for index in range(col_line_count):  # 竖线
-                if enable_offset_x:
-                    cell_no = int(index / 2) + 1  # 当前要绘制的是第几个格子的线段
-                    is_right_line = index % 2 == 1  # 当前绘制的是否是格子的右部分的线段
-                    offset_count = cell_no - 1
-                    left_sum_cell_width = (cell_no - 1) * cell_w
-                    left_sum_offset = offset_count * offset_x
-                    x = padding_x + left_sum_cell_width + left_sum_offset + int(is_right_line) * cell_w
-                else:
-                    x = padding_x + index * cell_w
-                dpg.draw_line(
-                    (x, begin_y),
-                    (x, begin_y + h),
-                    color=(255, 0, 0, 255),
-                    thickness=1,
-                )
+            for row_index in range(row):
+                for col_index in range(col):
+                    top_left = (
+                        offset_x + col_index * (cell_w + padding_x),
+                        offset_y + row_index * (cell_h + padding_y)
+                    )
+                    right_down = (
+                        top_left[0] + cell_w,
+                        top_left[1] + cell_h
+                    )
+                    dpg.draw_rectangle(
+                        top_left,
+                        right_down,
+                        color=(255, 0, 0, 255),
+                        thickness=1,
+                    )
         self._grid_line_layer = draw_layer
