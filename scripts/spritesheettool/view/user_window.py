@@ -1,6 +1,7 @@
 import os
 import math
 import logging
+import spritesheettool.com_func
 import dearpygui.dearpygui as dpg
 
 class UserWindow(object):
@@ -46,6 +47,7 @@ class UserWindow(object):
         self._export_menu = 0
         # endregion
         # region ui数据
+        self._img_path = ''
         self._img_w = 0
         self._img_h = 0
         self._img_scale = 1.0
@@ -92,8 +94,8 @@ class UserWindow(object):
                         callback=self._on_export
                     )
                     dpg.add_menu_item(
-                        label='Export As XML',
-                        user_data='xml',
+                        label='Export As Json',
+                        user_data='json',
                         callback=self._on_export
                     )
                 self._export_menu = export_menu
@@ -252,6 +254,7 @@ class UserWindow(object):
             logging.warning(f'path not exists: {file_path}')
             return
         self._img_w, self._img_h, channels, data = dpg.load_image(file_path)
+        self._img_path = file_path
         with dpg.texture_registry(show=False):
             self._tex = dpg.add_static_texture(self._img_w, self._img_h, data)
         dpg.show_item(self._op_root_group)
@@ -266,8 +269,19 @@ class UserWindow(object):
             dpg.show_item(self._no_import_alert)
         if file_type == 'images':
             pass
-        elif file_type == 'xml':
-            pass
+        elif file_type == 'json':
+            if self._mode == self.MODE_GRID_BY_CELL_SIZE:
+                sp = spritesheettool.com_func.get_sprite_sheet_by_sprite_size(
+                    self._cell_w, self._cell_h,
+                    self._img_path,
+                    self._img_w, self._img_h,
+                    self._offset_x, self._offset_y,
+                    self._padding_x, self._padding_y
+                )
+                parent_dir = os.getcwd()
+                path = os.path.join(parent_dir, 'test.json')
+                sp.save(path)
+                sp.save(parent_dir)
 
     def _on_help(self):
         import webbrowser

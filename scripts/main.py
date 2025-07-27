@@ -1,6 +1,7 @@
 import logging
 import dearpygui.dearpygui as dpg
-import user_window
+from spritesheettool.view import user_window
+
 """
 精灵图集剪裁工具
 1. 导入图片: 文件对话框导入, 控制台参数导入
