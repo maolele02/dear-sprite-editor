@@ -122,7 +122,7 @@ class UserWindow(object):
                 max_value=5.0,
                 default_value=1.0,
                 callback=self._on_scale_img,
-                label='scale'
+                label='Scale'
             )
             # 框选模式下拉框
             dpg.add_combo(
@@ -136,7 +136,7 @@ class UserWindow(object):
                 ret_group = self._create_op_group(mode, titles)
                 self._mode_2_group[mode] = ret_group
             self._op_root_group = op_group
-            dpg.add_button(label='slice', callback=self._on_slice)
+            dpg.add_button(label='Slice', callback=self._on_slice)
 
     def _create_op_group(self, mode, titles):
         with dpg.group(horizontal=False) as ret_group:
