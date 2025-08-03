@@ -9,7 +9,7 @@
 * 自动识别分割(初步支持)
 * 手动拖动调整矩形位置(暂未支持)
 
-![assets\example.png](assets/example.png)
+![assets/example.png](assets/example.png)
 
 ## Dependencies
 
