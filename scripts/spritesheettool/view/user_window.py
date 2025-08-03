@@ -96,10 +96,10 @@ class UserWindow(object):
                         user_data='json',
                         callback=self._on_export
                     )
-                self._export_menu = export_menu
-                with dpg.menu(label='Help'):
-                    dpg.add_menu_item(label='GitHub', callback=self._on_github)
-                    dpg.add_menu_item(label='Bilibili', callback=self._on_bilibili)
+            with dpg.menu(label='Help'):
+                dpg.add_menu_item(label='GitHub', callback=self._on_github)
+                dpg.add_menu_item(label='Bilibili', callback=self._on_bilibili)
+        self._export_menu = export_menu
 
     def _create_file_dlg(self):
         with dpg.file_dialog(
@@ -228,10 +228,10 @@ class UserWindow(object):
 
     # region 菜单操作相关
 
-    def _on_open_file(self):
+    def _on_open_file(self, sender, app_data, user_data):
         dpg.show_item(self._file_dlg)
 
-    def _on_add_file(self, sender, app_data):
+    def _on_add_file(self, sender, app_data, user_data):
         selections = app_data['selections']
         if not selections:
             logging.info('no file')
@@ -262,19 +262,19 @@ class UserWindow(object):
             sp.save(path)
 
 
-    def _on_github(self):
+    def _on_github(self, app_data):
         import webbrowser
         webbrowser.open('https://github.com/maolele02/dear-sprite-editor/tree/main', new=1)
 
-    def _on_bilibili(self):
+    def _on_bilibili(self, app_data):
         import webbrowser
         webbrowser.open('https://space.bilibili.com/353269387', new=1)
     # endregion
 
-    def _on_scale_img(self, sender, scale):
+    def _on_scale_img(self, sender, scale, user_data):
         self._img_win_obj.set_scale(scale)
 
-    def _on_switch_mode(self, sender, mode_name):
+    def _on_switch_mode(self, sender, mode_name, user_data):
         mode = 0
         if mode_name == MODE_GRID_BY_CELL_SIZE:
             mode = spritesheet.SplitMode.GRID_BY_CELL_SIZE
@@ -306,34 +306,34 @@ class UserWindow(object):
             else:
                 dpg.hide_item(group)
 
-    def _on_input_offset_x(self, sender, offset_x):
+    def _on_input_offset_x(self, sender, offset_x, user_data):
         self._img_win_obj.split_data.offset.x = offset_x
         self._img_win_obj.refresh()
 
-    def _on_input_offset_y(self, sender, offset_y):
+    def _on_input_offset_y(self, sender, offset_y, user_data):
         self._img_win_obj.split_data.offset.y = offset_y
         self._img_win_obj.refresh()
 
-    def _on_input_padding_x(self, sender, padding_x):
+    def _on_input_padding_x(self, sender, padding_x, user_data):
         self._img_win_obj.split_data.padding.x = padding_x
         self._img_win_obj.refresh()
 
-    def _on_input_padding_y(self, sender, padding_y):
+    def _on_input_padding_y(self, sender, padding_y, user_data):
         self._img_win_obj.split_data.padding.y = padding_y
         self._img_win_obj.refresh()
 
-    def _on_input_cell_row(self, sender, row_count):
+    def _on_input_cell_row(self, sender, row_count, user_data):
         self._img_win_obj.split_data.rc.x = row_count
         self._img_win_obj.refresh()
 
-    def _on_input_cell_col(self, sender, col_count):
+    def _on_input_cell_col(self, sender, col_count, user_data):
         self._img_win_obj.split_data.rc.y = col_count
         self._img_win_obj.refresh()
 
-    def _on_input_cell_w(self, sender, cell_w):
+    def _on_input_cell_w(self, sender, cell_w, user_data):
         self._img_win_obj.split_data.sprite_size.x = cell_w
         self._img_win_obj.refresh()
 
-    def _on_input_cell_h(self, sender, cell_h):
+    def _on_input_cell_h(self, sender, cell_h, user_data):
         self._img_win_obj.split_data.sprite_size.y = cell_h
         self._img_win_obj.refresh()

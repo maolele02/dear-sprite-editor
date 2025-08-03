@@ -17,4 +17,5 @@
 * pillow
 * dearpygui
 * opencv-python
+* pyinstaller
 
