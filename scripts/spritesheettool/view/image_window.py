@@ -99,8 +99,8 @@ class ImageWindow(object):
         rect_length = 8
         total_col = math.ceil(w / rect_length)
         total_row = math.ceil(h / rect_length)
-        grey = (190, 190, 190, 127)
-        white = (0, 0, 0, 127)
+        grey = (190, 190, 190, 60)
+        white = (0, 0, 0, 60)
         for row in range(total_row):
             for col in range(total_col):
                 if (

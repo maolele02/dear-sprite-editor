@@ -1,12 +1,11 @@
 import os
-import math
 import logging
 import sys
 
 import dearpygui.dearpygui as dpg
 from spritesheettool import spritesheet
 from spritesheettool import com_func
-from com_widget.image_window import *
+from spritesheettool.view.image_window import *
 
 MODE_AUTOMATIC = 'Automatic'
 MODE_GRID_BY_CELL_COUNT = 'Grid By Cell Count'
@@ -249,11 +248,9 @@ class UserWindow(object):
         if not self._img_win_obj.image_path:
             dpg.show_item(self._no_import_alert)
         parent_dir = os.path.join(sys.argv[0], '..', '..', 'output')
-        img_w, img_h = self._img_win_obj.image_size
         split_data = self._img_win_obj.split_data
         sp = com_func.get_sprite_sheet_by_split_data(
             self._img_win_obj.image_path,
-            img_w, img_h,
             split_data
         )
         if file_type == 'images':
