@@ -34,9 +34,9 @@ class Vector2(object):
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            return Vector2(self._x * other, self._y * other)
+            return Vector2(int(self._x * other), int(self._y * other))
         elif isinstance(other, Vector2):
-            return Vector2(self._x * other.x, self._y * other.y)
+            return Vector2(int(self._x * other.x), int(self._y * other.y))
         else:
             return NotImplemented
 
@@ -139,6 +139,28 @@ class Rect(object):
     def get_height(self):
         return self._size.y
 
+    def to_tuple(self):
+        return self.x, self.y, self.width, self.height
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            x = self.x * other
+            y = self.y * other
+            w = self.width * other
+            h = self.height * other
+            return Rect(int(x), int(y), int(w), int(h))
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.width
+        yield self.height
+
     def __repr__(self):
         return f'{self.__class__.__name__}({self.x}, {self.y}, {self.width}, {self.height})'
 
@@ -186,6 +208,28 @@ class FRect(object):
 
     def get_height(self):
         return self._size.y
+
+    def to_tuple(self):
+        return self.x, self.y, self.width, self.height
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            x = self.x * other
+            y = self.y * other
+            w = self.width * other
+            h = self.height * other
+            return FRect(x, y, w, h)
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.width
+        yield self.height
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.x}, {self.y}, {self.width}, {self.height})'

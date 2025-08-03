@@ -1,5 +1,6 @@
 import math
 from core.math import *
+from spritesheettool import com_func
 from spritesheettool import spritesheet
 import dearpygui.dearpygui as dpg
 
@@ -149,20 +150,32 @@ class ImageWindow(object):
         elif self.split_data.mode == spritesheet.SplitMode.GRID_BY_CELL_SIZE:
             row = math.ceil((h + padding_y) / (cell_h + padding_y))
             col = math.ceil((w + padding_x) / (cell_w + padding_x))
-        with dpg.draw_layer(parent=self._draw_list) as box_layer:
-            for row_index in range(row):
-                for col_index in range(col):
-                    top_left = (
-                        offset_x + col_index * (cell_w + padding_x),
-                        offset_y + row_index * (cell_h + padding_y)
-                    )
-                    right_down = (
-                        top_left[0] + cell_w,
-                        top_left[1] + cell_h
-                    )
+        if self.split_data.mode in [spritesheet.SplitMode.GRID_BY_CELL_SIZE, spritesheet.SplitMode.GRID_BY_CELL_COUNT]:
+            with dpg.draw_layer(parent=self._draw_list) as box_layer:
+                for row_index in range(row):
+                    for col_index in range(col):
+                        top_left = (
+                            offset_x + col_index * (cell_w + padding_x),
+                            offset_y + row_index * (cell_h + padding_y)
+                        )
+                        right_down = (
+                            top_left[0] + cell_w,
+                            top_left[1] + cell_h
+                        )
+                        dpg.draw_rectangle(
+                            top_left,
+                            right_down,
+                            color=(255, 0, 0, 255),
+                            thickness=1,
+                        )
+        else:
+            rects = com_func.find_contours_with_transparency(self._img_path)
+            with dpg.draw_layer(parent=self._draw_list) as box_layer:
+                for rect in rects:
+                    x, y, w, h = rect * self._scale
                     dpg.draw_rectangle(
-                        top_left,
-                        right_down,
+                        (x, y),
+                        (x + w, y + h),
                         color=(255, 0, 0, 255),
                         thickness=1,
                     )

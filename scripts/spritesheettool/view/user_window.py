@@ -97,7 +97,9 @@ class UserWindow(object):
                         callback=self._on_export
                     )
                 self._export_menu = export_menu
-            dpg.add_menu_item(label='Help', callback=self._on_help)
+                with dpg.menu(label='Help'):
+                    dpg.add_menu_item(label='GitHub', callback=self._on_github)
+                    dpg.add_menu_item(label='Bilibili', callback=self._on_bilibili)
 
     def _create_file_dlg(self):
         with dpg.file_dialog(
@@ -260,7 +262,11 @@ class UserWindow(object):
             sp.save(path)
 
 
-    def _on_help(self):
+    def _on_github(self):
+        import webbrowser
+        webbrowser.open('https://github.com/maolele02/dear-sprite-editor/tree/main', new=1)
+
+    def _on_bilibili(self):
         import webbrowser
         webbrowser.open('https://space.bilibili.com/353269387', new=1)
     # endregion
@@ -274,6 +280,8 @@ class UserWindow(object):
             mode = spritesheet.SplitMode.GRID_BY_CELL_SIZE
         elif mode_name == MODE_GRID_BY_CELL_COUNT:
             mode = spritesheet.SplitMode.GRID_BY_CELL_COUNT
+        elif mode_name == MODE_AUTOMATIC:
+            mode = spritesheet.SplitMode.AUTOMATIC
         if mode > 0:
             self._switch_mode(mode)
 

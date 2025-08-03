@@ -36,6 +36,10 @@ class SpriteSheet(object):
             name = self._gen_sprite_name()
         self._rects.append(SpriteRect(x, y, w, h, name))
 
+    def extend_sprite_rects(self, rects):
+        for rect in rects:
+            self.append_sprite_rect(rect.x, rect.y, rect.width, rect.height)
+
     def save(self, path):
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
@@ -120,4 +124,5 @@ class SpriteSheetSplitData(object):
     padding = Vector2(0, 0)
     sprite_size = Vector2(16, 16)
     rc = Vector2(1, 1)
+    automatic_min_area = 64
 
