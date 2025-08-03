@@ -1,6 +1,8 @@
 import os
 import math
 import logging
+import sys
+
 import dearpygui.dearpygui as dpg
 from spritesheettool import spritesheet
 from spritesheettool import com_func
@@ -246,7 +248,7 @@ class UserWindow(object):
     def _on_export(self, sender, app_data, file_type):
         if not self._img_win_obj.image_path:
             dpg.show_item(self._no_import_alert)
-        parent_dir = os.getcwd()
+        parent_dir = os.path.join(sys.argv[0], '..', '..', 'output')
         img_w, img_h = self._img_win_obj.image_size
         split_data = self._img_win_obj.split_data
         sp = com_func.get_sprite_sheet_by_split_data(
@@ -257,7 +259,7 @@ class UserWindow(object):
         if file_type == 'images':
             sp.save(parent_dir)
         elif file_type == 'json':
-            path = os.path.join(parent_dir, 'test.json')
+            path = os.path.join(parent_dir, 'output.json')
             sp.save(path)
 
 

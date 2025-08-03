@@ -1,9 +1,5 @@
-import json
 import math
-import pathlib
 import logging
-import core.math
-from PIL import Image
 from . import spritesheet
 
 def get_sprite_sheet_by_sprite_size(
@@ -32,7 +28,6 @@ def get_sprite_sheet_by_split_data(
     total_row, total_col = split_data.rc
     sprite_w, sprite_h = split_data.sprite_size
     if split_data.mode == spritesheet.SplitMode.GRID_BY_CELL_COUNT:
-        print("111111111111")
         sprite_h = math.ceil(
             (img_h - (split_data.rc.x - 1) * split_data.padding.y) / split_data.rc.x
         )
@@ -40,7 +35,6 @@ def get_sprite_sheet_by_split_data(
             (img_w - (split_data.rc.y - 1) * split_data.padding.x) / split_data.rc.y
         )
     elif split_data.mode == spritesheet.SplitMode.GRID_BY_CELL_SIZE:
-        print("2222222222")
         total_col = math.ceil(
             (img_w - split_data.offset.x + split_data.padding.x) / (split_data.sprite_size.x + split_data.padding.x)
         )
@@ -54,5 +48,4 @@ def get_sprite_sheet_by_split_data(
             x = split_data.offset.x + col * (sprite_w + split_data.offset.x)
             y = split_data.offset.y + row * (sprite_h + split_data.offset.y)
             sp.append_sprite_rect(x, y, sprite_w, sprite_h)
-    print(sp)
     return sp

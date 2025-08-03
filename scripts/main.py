@@ -23,7 +23,7 @@ user_window = user_window.UserWindow()
 user_window_guid = user_window.create()
 dpg.set_primary_window(user_window_guid, True)
 
-dpg.create_viewport(title='Sprite Editor', width=800, height=600)
+dpg.create_viewport(title='Dear Sprite Editor', width=800, height=600)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()

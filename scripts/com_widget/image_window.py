@@ -59,10 +59,8 @@ class ImageWindow(object):
         self.refresh()
 
     def refresh(self):
-        print("refresh")
         if self._texture > 0:
             self._rebuild_draw_list()
-            print("refreshed")
 
     def _init_split_data(self):
         data = self._split_data
