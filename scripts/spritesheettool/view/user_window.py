@@ -1,28 +1,31 @@
 import os
 import math
 import logging
-import spritesheettool.com_func
 import dearpygui.dearpygui as dpg
+from spritesheettool import spritesheet
+from spritesheettool import com_func
+from com_widget.image_window import *
+
+MODE_AUTOMATIC = 'Automatic'
+MODE_GRID_BY_CELL_COUNT = 'Grid By Cell Count'
+MODE_GRID_BY_CELL_SIZE = 'Grid By Cell Size'
 
 class UserWindow(object):
-    MODE_AUTOMATIC = 'Automatic'
-    MODE_GRID_BY_CELL_COUNT = 'Grid By Cell Count'
-    MODE_GRID_BY_CELL_SIZE = 'Grid By Cell Size'
 
     MODES = (
-        MODE_GRID_BY_CELL_COUNT,
         MODE_GRID_BY_CELL_SIZE,
+        MODE_GRID_BY_CELL_COUNT,
         MODE_AUTOMATIC,
     )
 
     MODE_2_OP_TITLES = {
-        MODE_AUTOMATIC: (),
-        MODE_GRID_BY_CELL_COUNT: (
+        spritesheet.SplitMode.AUTOMATIC: (),
+        spritesheet.SplitMode.GRID_BY_CELL_COUNT: (
             'Column & Row',
             'Offset',
             'Padding'
         ),
-        MODE_GRID_BY_CELL_SIZE: (
+        spritesheet.SplitMode.GRID_BY_CELL_SIZE: (
             'Pixel Size',
             'Offset',
             'Padding',
@@ -35,33 +38,18 @@ class UserWindow(object):
         # region 控件guid
         self._win = dpg.add_window(label='SpriteSheetSpliter', autosize=True)
         self._file_dlg = 0
-        self._tex = 0
         self._img_win = 0
         self._op_root_group = 0
         self._auto_operate_group = 0
         self._grid_by_cell_size_group = 0
         self._grid_by_cell_count_group = 0
-        self._img_draw_list = 0
-        self._grid_line_layer = 0
         self._no_import_alert = 0
         self._export_menu = 0
         # endregion
         # region ui数据
-        self._img_path = ''
-        self._img_w = 0
-        self._img_h = 0
-        self._img_scale = 1.0
-        self._default_mode = self.MODE_GRID_BY_CELL_SIZE
-        self._mode = self._default_mode
         self._mode_2_group = {}
-        self._row = 1
-        self._col = 1
-        self._cell_w = 16
-        self._cell_h = 16
-        self._offset_x = 0
-        self._offset_y = 0
-        self._padding_x = 0
-        self._padding_y = 0
+        self._default_mode = spritesheet.SplitMode.GRID_BY_CELL_SIZE
+        self._img_win_obj: ImageWindow = ImageWindow(self._win)
         # endregion
 
     def create(self):
@@ -72,16 +60,25 @@ class UserWindow(object):
     def destroy(self):
         dpg.delete_item(self._file_dlg)
 
+    def _get_mode_desc(self, mode) -> str:
+        if mode == spritesheet.SplitMode.GRID_BY_CELL_COUNT:
+            return MODE_GRID_BY_CELL_COUNT
+        if mode == spritesheet.SplitMode.GRID_BY_CELL_SIZE:
+            return MODE_GRID_BY_CELL_SIZE
+        if mode == spritesheet.SplitMode.AUTOMATIC:
+            return MODE_AUTOMATIC
+        logging.error(f'error mode: {mode}')
+        return ''
+
     def _create_widgets(self):
         self._create_menu()
-        self._create_file_dlg()
         self._create_img_operates()
         self._create_img_child_window()
+        self._create_file_dlg()
         self._create_alerts()
 
     def _init(self):
         self._switch_mode(self._default_mode)
-
 
     def _create_menu(self):
         with dpg.menu_bar(parent=self._win):
@@ -128,7 +125,7 @@ class UserWindow(object):
             # 框选模式下拉框
             dpg.add_combo(
                 self.MODES,
-                default_value=self._default_mode,
+                default_value=self._get_mode_desc(self._default_mode),
                 label='Mode',
                 callback=self._on_switch_mode
             )
@@ -181,12 +178,12 @@ class UserWindow(object):
                  parent = group,
             )
         else:
-            if mode == self.MODE_GRID_BY_CELL_COUNT:
+            if mode == spritesheet.SplitMode.GRID_BY_CELL_COUNT:
                 if title == 'Column & Row':
                     dpg.add_input_int(
                         label='C',
                         min_value=1,
-                        default_value=self._col,
+                        default_value=self._img_win_obj.split_data.rc.y,
                         callback=self._on_input_cell_col,
                         width=self.OP_INPUT_BOX_WIDTH,
                         parent=group,
@@ -194,30 +191,30 @@ class UserWindow(object):
                     dpg.add_input_int(
                         label='R',
                         min_value=1,
-                        default_value=self._row,
+                        default_value=self._img_win_obj.split_data.rc.x,
                         callback=self._on_input_cell_row,
                         width=self.OP_INPUT_BOX_WIDTH,
                         parent=group,
                     )
-            if mode == self.MODE_GRID_BY_CELL_SIZE:
+            elif mode == spritesheet.SplitMode.GRID_BY_CELL_SIZE:
                 if title == 'Pixel Size':
                     dpg.add_input_int(
                         label='X',
                         callback=self._on_input_cell_w,
-                        default_value=self._cell_w,
+                        default_value=self._img_win_obj.split_data.sprite_size.x,
                         width=self.OP_INPUT_BOX_WIDTH,
                         parent=group,
                     )
                     dpg.add_input_int(
                         label='Y',
                         callback=self._on_input_cell_h,
-                        default_value=self._cell_h,
+                        default_value=self._img_win_obj.split_data.sprite_size.y,
                         width=self.OP_INPUT_BOX_WIDTH,
                         parent=group,
                     )
 
     def _create_img_child_window(self):
-        self._img_win = dpg.add_child_window(parent=self._win, show=False, horizontal_scrollbar=True)
+        self._img_win_obj.create()
 
     def _create_alerts(self):
         with dpg.window(label='export error', modal=True, show=False, no_title_bar=True) as no_import_alert:
@@ -225,19 +222,6 @@ class UserWindow(object):
             dpg.add_separator()
             dpg.add_button(label="OK", width=75, callback=lambda: dpg.configure_item(no_import_alert, show=False))
         self._no_import_alert = no_import_alert
-
-    def _rebuild_img_draw_list_layers(self):
-        if self._img_draw_list > 0:
-            dpg.delete_item(self._img_draw_list)
-            self._img_draw_list = 0
-            self._grid_line_layer = 0
-        w = self._img_w * self._img_scale
-        h = self._img_h * self._img_scale
-        with dpg.drawlist(width=w + 10, height=h + 10, parent=self._img_win) as draw_list:
-            with dpg.draw_layer():
-                dpg.draw_image(self._tex, (0, 0), (w, h), uv_min=(0, 0), uv_max=(1, 1))
-        self._img_draw_list = draw_list
-        self._rebuild_draw_layers()
 
     # region 菜单操作相关
 
@@ -253,35 +237,29 @@ class UserWindow(object):
         if not os.path.exists(file_path):
             logging.warning(f'path not exists: {file_path}')
             return
-        self._img_w, self._img_h, channels, data = dpg.load_image(file_path)
         self._img_path = file_path
-        with dpg.texture_registry(show=False):
-            self._tex = dpg.add_static_texture(self._img_w, self._img_h, data)
+        self._img_win_obj.set_image(self._img_path)
+        self._img_win_obj.refresh()
         dpg.show_item(self._op_root_group)
-        dpg.show_item(self._img_win)
-        if self._img_draw_list > 0:
-            dpg.delete_item(self._img_draw_list)
-        self._rebuild_img_draw_list_layers()
-        self._rebuild_draw_layers()
+        dpg.show_item(self._img_win_obj.guid)
 
     def _on_export(self, sender, app_data, file_type):
-        if self._img_draw_list == 0:
+        if not self._img_win_obj.image_path:
             dpg.show_item(self._no_import_alert)
+        parent_dir = os.getcwd()
+        img_w, img_h = self._img_win_obj.image_size
+        split_data = self._img_win_obj.split_data
+        sp = com_func.get_sprite_sheet_by_split_data(
+            self._img_win_obj.image_path,
+            img_w, img_h,
+            split_data
+        )
         if file_type == 'images':
-            pass
+            sp.save(parent_dir)
         elif file_type == 'json':
-            if self._mode == self.MODE_GRID_BY_CELL_SIZE:
-                sp = spritesheettool.com_func.get_sprite_sheet_by_sprite_size(
-                    self._cell_w, self._cell_h,
-                    self._img_path,
-                    self._img_w, self._img_h,
-                    self._offset_x, self._offset_y,
-                    self._padding_x, self._padding_y
-                )
-                parent_dir = os.getcwd()
-                path = os.path.join(parent_dir, 'test.json')
-                sp.save(path)
-                sp.save(parent_dir)
+            path = os.path.join(parent_dir, 'test.json')
+            sp.save(path)
+
 
     def _on_help(self):
         import webbrowser
@@ -289,101 +267,66 @@ class UserWindow(object):
     # endregion
 
     def _on_scale_img(self, sender, scale):
-        self._img_scale = scale
-        self._rebuild_img_draw_list_layers()
+        self._img_win_obj.set_scale(scale)
 
-    def _on_switch_mode(self, sender, selected_item):
-        self._switch_mode(selected_item)
+    def _on_switch_mode(self, sender, mode_name):
+        mode = 0
+        if mode_name == MODE_GRID_BY_CELL_SIZE:
+            mode = spritesheet.SplitMode.GRID_BY_CELL_SIZE
+        elif mode_name == MODE_GRID_BY_CELL_COUNT:
+            mode = spritesheet.SplitMode.GRID_BY_CELL_COUNT
+        if mode > 0:
+            self._switch_mode(mode)
 
     def _on_slice(self, sender):
         pass
 
     def _switch_mode(self, mode):
-        self._mode = mode
-        for mode in self.MODES:
-            group = self._mode_2_group.get(mode, 0)
+        if self._img_win_obj.mode == mode:
+            return
+        self._img_win_obj.mode = mode
+        self._img_win_obj.refresh()
+        for cur_mode in [
+            spritesheet.SplitMode.GRID_BY_CELL_COUNT,
+            spritesheet.SplitMode.GRID_BY_CELL_SIZE,
+            spritesheet.SplitMode.AUTOMATIC,
+        ]:
+            group = self._mode_2_group.get(cur_mode, 0)
             if group == 0:
                 continue
-            if mode == self._mode:
+            if mode == cur_mode:
                 dpg.show_item(group)
             else:
                 dpg.hide_item(group)
-        self._rebuild_draw_layers()
 
     def _on_input_offset_x(self, sender, offset_x):
-        self._offset_x = offset_x
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.offset.x = offset_x
+        self._img_win_obj.refresh()
 
     def _on_input_offset_y(self, sender, offset_y):
-        self._offset_y = offset_y
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.offset.y = offset_y
+        self._img_win_obj.refresh()
 
     def _on_input_padding_x(self, sender, padding_x):
-        self._padding_x = padding_x
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.padding.x = padding_x
+        self._img_win_obj.refresh()
 
     def _on_input_padding_y(self, sender, padding_y):
-        self._padding_y = padding_y
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.padding.y = padding_y
+        self._img_win_obj.refresh()
 
     def _on_input_cell_row(self, sender, row_count):
-        self._row = row_count
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.rc.x = row_count
+        self._img_win_obj.refresh()
 
     def _on_input_cell_col(self, sender, col_count):
-        self._col = col_count
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.rc.y = col_count
+        self._img_win_obj.refresh()
 
     def _on_input_cell_w(self, sender, cell_w):
-        self._cell_w = cell_w
-        self._rebuild_draw_layers()
+        self._img_win_obj.split_data.sprite_size.x = cell_w
+        self._img_win_obj.refresh()
 
     def _on_input_cell_h(self, sender, cell_h):
-        self._cell_h = cell_h
-        self._rebuild_draw_layers()
-
-    def _rebuild_draw_layers(self):
-        if self._img_draw_list == 0:
-            return
-        if self._grid_line_layer > 0:
-            dpg.delete_item(self._grid_line_layer)
-        row, col = 0, 0
-        cell_w, cell_h = 0, 0
-        img_w = self._img_w * self._img_scale
-        img_h = self._img_h * self._img_scale
-        padding_x = self._padding_x * self._img_scale
-        padding_y = self._padding_y * self._img_scale
-        offset_x = self._offset_x * self._img_scale
-        offset_y = self._offset_y * self._img_scale
-        w = img_w - offset_x
-        h = img_h - offset_y
-        if self._mode == self.MODE_GRID_BY_CELL_COUNT:
-            row = self._row
-            col = self._col
-            # cell_h由h = row * cell_h + (row - 1) * padding_y得出
-            cell_h = (h - (row - 1) * padding_y) / row
-            # cell_w由h = col * cell_w + (col - 1) * padding_x得出
-            cell_w = (w - (col - 1) * padding_x) / col
-        elif self._mode == self.MODE_GRID_BY_CELL_SIZE:
-            cell_w = self._cell_w * self._img_scale
-            cell_h = self._cell_h * self._img_scale
-            row = math.ceil((h + padding_y) / (cell_h + padding_y))
-            col = math.ceil((w + padding_x) / (cell_w + padding_x))
-        with dpg.draw_layer(parent=self._img_draw_list) as draw_layer:
-            for row_index in range(row):
-                for col_index in range(col):
-                    top_left = (
-                        offset_x + col_index * (cell_w + padding_x),
-                        offset_y + row_index * (cell_h + padding_y)
-                    )
-                    right_down = (
-                        top_left[0] + cell_w,
-                        top_left[1] + cell_h
-                    )
-                    dpg.draw_rectangle(
-                        top_left,
-                        right_down,
-                        color=(255, 0, 0, 255),
-                        thickness=1,
-                    )
-        self._grid_line_layer = draw_layer
+        self._img_win_obj.split_data.sprite_size.y = cell_h
+        self._img_win_obj.refresh()

@@ -32,6 +32,24 @@ class Vector2(object):
         self._x -= other.x
         self._y -= other.y
 
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            return Vector2(self._x * other, self._y * other)
+        elif isinstance(other, Vector2):
+            return Vector2(self._x * other.x, self._y * other.y)
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __iter__(self):
+        yield self._x
+        yield self._y
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.x}, {self.y})'
+
     x = property(get_x, set_x)
     y = property(get_y, set_y)
 
@@ -61,6 +79,24 @@ class FVector2(object):
     def __sub__(self, other):
         self._x -= other.x
         self._y -= other.y
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            return FVector2(self._x * other, self._y * other)
+        elif isinstance(other, Vector2):
+            return FVector2(self._x * other.x, self._y * other.y)
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __iter__(self):
+        yield self._x
+        yield self._y
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.x}, {self.y})'
 
     x = property(get_x, set_x)
     y = property(get_y, set_y)
@@ -102,6 +138,9 @@ class Rect(object):
 
     def get_height(self):
         return self._size.y
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.x}, {self.y}, {self.width}, {self.height})'
 
     pos = property(get_pos, set_pos)
     size = property(get_size, set_size)
@@ -147,6 +186,9 @@ class FRect(object):
 
     def get_height(self):
         return self._size.y
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.x}, {self.y}, {self.width}, {self.height})'
 
     pos = property(get_pos, set_pos)
     size = property(get_size, set_size)

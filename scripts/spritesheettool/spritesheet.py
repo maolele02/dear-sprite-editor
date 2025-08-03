@@ -1,7 +1,9 @@
+import enum
 import json
 import pathlib
 from PIL import Image
 from typing import Union
+from dataclasses import dataclass
 from core.math import *
 
 class SpriteSheet(object):
@@ -79,6 +81,14 @@ class SpriteSheet(object):
     def _gen_sprite_name(self) -> str:
         return str(len(self._rects))
 
+    def __repr__(self):
+        return f'''{self.__class__.__name__}(
+img: {self.img}, 
+img_size: {self.size},
+rects: {self._rects}
+)
+'''
+
     img = property(get_img)
     size = property(get_size)
 
@@ -90,4 +100,24 @@ class SpriteRect(Rect):
     def get_name(self):
         return self._name
 
+    def __repr__(self):
+        return super().__repr__()
+
     name = property(get_name)
+
+
+
+class SplitMode(enum.IntEnum):
+    NONE = 0
+    AUTOMATIC = 1
+    GRID_BY_CELL_COUNT = 2
+    GRID_BY_CELL_SIZE = 3
+
+@dataclass
+class SpriteSheetSplitData(object):
+    mode = SplitMode.NONE
+    offset = Vector2(0, 0)
+    padding = Vector2(0, 0)
+    sprite_size = Vector2(16, 16)
+    rc = Vector2(1, 1)
+
