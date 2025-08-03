@@ -1,5 +1,6 @@
 import enum
 import json
+import logging
 import pathlib
 from PIL import Image
 from typing import Union
@@ -44,9 +45,13 @@ class SpriteSheet(object):
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)
         if path.is_dir():
+            logging.info(f'saving sprite images to {path}...')
             self._save_as_sprite_images(path)
+            logging.info('save sprite images completed')
         elif path.suffix == '.json':
+            logging.info(f'saving sprite sheet json file {path.as_posix()} ...')
             self._save_as_json(path)
+            logging.info('save sprite sheet json completed')
 
     def _save_as_sprite_images(self, directory: pathlib.Path):
         suffix = self._img.suffix

@@ -1,1 +1,3 @@
-[output]
+[export]
+auto_clear = true
+output_dir = ''

@@ -1,5 +1,6 @@
-import os.path
-import sys
+import os
+import misc
+import config
 import logging
 import dearpygui.dearpygui as dpg
 from spritesheettool.view import user_window
@@ -14,6 +15,8 @@ logging.basicConfig(
     filemode='w'
 )
 
+config.load(misc.get_root_dir() / 'config.toml')
+
 dpg.create_context()
 
 # 创建窗口
@@ -21,7 +24,7 @@ user_window = user_window.UserWindow()
 user_window_guid = user_window.create()
 dpg.set_primary_window(user_window_guid, True)
 
-icon_path = os.path.join(sys.argv[0], 'icon.png')
+icon_path = (misc.get_root_dir() / 'icon.png').as_posix()
 
 dpg.create_viewport(
     title='Dear Sprite Editor',

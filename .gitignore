@@ -215,3 +215,4 @@ main.dist
 main.onefile-build
 build
 dist
+scripts/output

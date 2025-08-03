@@ -1,6 +1,9 @@
 import os
+import misc
+import shutil
+import config
 import logging
-import sys
+
 
 import dearpygui.dearpygui as dpg
 from spritesheettool import spritesheet
@@ -242,6 +245,7 @@ class UserWindow(object):
             return
         self._img_path = file_path
         self._img_win_obj.set_image(self._img_path)
+        logging.info(f'loaded image: {file_path}')
         self._img_win_obj.refresh()
         dpg.show_item(self._op_root_group)
         dpg.show_item(self._img_win_obj.guid)
@@ -249,16 +253,22 @@ class UserWindow(object):
     def _on_export(self, sender, app_data, file_type):
         if not self._img_win_obj.image_path:
             dpg.show_item(self._no_import_alert)
-        parent_dir = os.path.join(sys.argv[0], '..', '..', 'output')
+        output_dir = misc.get_export_output_dir()
         split_data = self._img_win_obj.split_data
         sp = com_func.get_sprite_sheet_by_split_data(
             self._img_win_obj.image_path,
             split_data
         )
+        if config.is_auto_export_clear() and output_dir.exists():
+            logging.info(f'delete output dir: {output_dir}')
+            shutil.rmtree(output_dir)
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+            logging.info(f'create output dir: {output_dir}')
         if file_type == 'images':
-            sp.save(parent_dir)
+            sp.save(output_dir)
         elif file_type == 'json':
-            path = os.path.join(parent_dir, 'output.json')
+            path = output_dir / 'output.json'
             sp.save(path)
 
 
