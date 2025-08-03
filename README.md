@@ -1,7 +1,5 @@
 # DearSpriteEditor
 
-## 功能介绍
-
 支持图集分割功能。
 
 * 根据分图大小分割
@@ -19,5 +17,5 @@
 * opencv-python
 * pyinstaller
 
-## 其他
+## Other
 example.png来源于[character-satyr](https://lucky-loops.itch.io/character-satyr)。
