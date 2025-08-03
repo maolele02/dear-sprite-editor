@@ -18,4 +18,4 @@
 * pyinstaller
 
 ## Other
-example.png来源于[character-satyr](https://lucky-loops.itch.io/character-satyr)。
+assets/img.png来源于[character-satyr](https://lucky-loops.itch.io/character-satyr)。
